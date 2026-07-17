@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Controle de Notas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--nv:#1e293b;--nl:#334155;--nc:#0f172a}
+body{background:#f1f5f9;font-family:system-ui,-apple-system,sans-serif;color:#1e293b;font-size:.85rem}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-weight:600;font-size:.82rem;cursor:pointer;border:none;transition:all .15s}
+.btn-pri{background:var(--nv);color:#fff}
+.btn-pri:hover{background:var(--nl)}
+.btn-out{background:#fff;color:var(--nv);border:1.5px solid #cbd5e1}
+.btn-out:hover{border-color:var(--nv)}
+.btn-suc{background:#059669;color:#fff}
+.btn-suc:hover{background:#047857}
+.btn-del{background:#dc2626;color:#fff}
+.btn-del:hover{background:#b91c1c}
+.btn-sm{padding:4px 9px;font-size:.75rem}
+.header{background:linear-gradient(135deg,var(--nv),var(--nc));color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header-brand{display:flex;align-items:center;gap:10px}
+.header-brand svg{width:24px;height:24px}
+.header-brand h1{font-size:1.05rem;font-weight:700}
+.header-brand span{font-size:.72rem;color:#94a3b8}
+.header-actions{display:flex;gap:6px;flex-wrap:wrap}
+.tab-bar{display:flex;background:var(--nv);padding:0 16px;gap:0}
+.tab{padding:10px 20px;font-size:.82rem;font-weight:600;color:#94a3b8;cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;transition:all .15s}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:#fff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.tc{padding:12px 16px;max-width:1400px;margin:0 auto}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{background:#f8fafc;color:#475569;font-weight:600;text-align:left;padding:6px 7px;border-bottom:2px solid #e2e8f0;cursor:pointer;user-select:none;white-space:nowrap;font-size:.75rem;position:sticky;top:0;z-index:5}
+th:hover{color:var(--nv)}
+td{padding:4px 7px;border-bottom:1px solid #f1f5f9;vertical-align:middle;white-space:nowrap}
+tr:hover td{background:#fafafa}
+.filtros{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid #e2e8f0}
+.sel{padding:3px 6px;border:1.5px solid #e2e8f0;border-radius:5px;font-size:.78rem;background:#fff;color:#334155;outline:none;max-width:130px}
+.sel:focus{border-color:var(--nv)}
+.srch{padding:5px 10px 5px 28px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;outline:none;width:200px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 7px center no-repeat}
+.srch:focus{border-color:var(--nv)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mc{background:#fff;border-radius:12px;width:100%;max-width:820px;max-height:90vh;overflow-y:auto;padding:22px;position:relative}
+.mc h2{font-size:1.1rem;font-weight:700;color:var(--nv);margin-bottom:14px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg .fc{grid-column:1/-1}
+.fl{display:block;font-size:.76rem;font-weight:600;color:#475569;margin-bottom:3px}
+.fi{width:100%;padding:6px 9px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.82rem;outline:none}
+.fi:focus{border-color:var(--nv)}
+.cg{display:flex;gap:14px;flex-wrap:wrap}
+.cg label{display:flex;align-items:center;gap:4px;font-size:.82rem;cursor:pointer}
+.toast{position:fixed;bottom:18px;right:18px;padding:10px 16px;border-radius:8px;color:#fff;font-weight:600;font-size:.82rem;z-index:999;animation:si .3s ease}
+.toast-s{background:#059669}
+.toast-e{background:#dc2626}
+.toast-i{background:var(--nv)}
+@keyframes si{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.bdg{display:inline-block;padding:1px 7px;border-radius:999px;font-size:.68rem;font-weight:600}
+.bg-g{background:#d1fae5;color:#065f46}
+.bg-y{background:#fef3c7;color:#92400e}
+.bg-r{background:#fee2e2;color:#991b1b}
+.bg-b{background:#dbeafe;color:#1e40af}
+.bg-p{background:#f3e8ff;color:#6b21a8}
+.bg-z{background:#f1f5f9;color:#475569}
+.tl-item{padding:5px 10px;border-left:3px solid #e2e8f0;margin:3px 0;font-size:.78rem;background:#fafafa;border-radius:0 5px 5px 0}
+.tl-item .ts{color:#94a3b8;font-size:.7rem}
+.tl-green{border-left-color:#059669}
+.tl-yellow{border-left-color:#d97706}
+.tl-blue{border-left-color:#2563eb}
+.tl-purple{border-left-color:#7c3aed}
+.ac-wrap{position:relative;display:inline-block}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-radius:0 0 7px 7px;max-height:160px;overflow-y:auto;z-index:30;display:none}
+.ac-list div{padding:5px 9px;font-size:.8rem;cursor:pointer}
+.ac-list div:hover{background:#f1f5f9}
+.cbx{width:15px;height:15px;cursor:pointer;accent-color:var(--nv)}
+.tbl-wrap{overflow-x:auto;max-height:calc(100vh - 280px);overflow-y:auto}
+.empty{text-align:center;padding:40px 20px;color:#94a3b8}
+.pag{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid #e2e8f0;font-size:.8rem;color:#64748b}
+.ic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;padding:14px 0}
+.ic{background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ic-val{font-size:2rem;font-weight:800;line-height:1.2}
+.ic-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-top:2px}
+.ic-desc{font-size:.75rem;color:#94a3b8;margin-top:6px}
+.ic-red .ic-val{color:#dc2626}
+.ic-yellow .ic-val{color:#d97706}
+.ic-orange .ic-val{color:#ea580c}
+.ic-blue .ic-val{color:#2563eb}
+.ic-purple .ic-val{color:#7c3aed}
+.ic-green .ic-val{color:#059669}
+.tl-header{padding:10px 0;display:flex;gap:8px}
+.tl-header input{width:100%}
+.tl-list{max-height:60vh;overflow-y:auto}
+.exp-panel{display:none}
+.exp-panel.open{display:table-row}
+.hl{background:#fef08a;padding:0 2px;border-radius:2px}
+@media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="header">
+    <div class="header-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <div>
+        <h1>Controle de Notas</h1>
+        <span>Notas fiscais e pedidos</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btnSalvar" style="background:rgba(255,255,255,.15);color:#fff" onclick="salvar()">Salvar</button>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff" onclick="baixarExcel()">Exportar</button>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff" onclick="abrirUpload()">Upload</button>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff" onclick="mostrarHist()">Backups</button>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="planilha" onclick="switchTab('planilha')">Planilha</button>
+    <button class="tab" data-tab="indicadores" onclick="switchTab('indicadores')">Indicadores</button>
+    <button class="tab" data-tab="timeline" onclick="switchTab('timeline')">Timeline</button>
+  </nav>
+
+  <div id="loading" style="padding:60px 0;text-align:center;color:#94a3b8">
+    <div style="font-size:1.8rem;margin-bottom:8px">Carregando...</div>
+    <div style="font-size:.85rem">Aguardando dados do servidor</div>
+  </div>
+
+  <div id="main" class="hidden">
+    <!-- ABA PLANILHA -->
+    <div id="tab-planilha" class="tab-content active">
+      <div class="tc">
+        <div class="card">
+          <div class="filtros">
+            <span style="font-size:.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Filtrar</span>
+            <select class="sel" id="fMes" onchange="renderT()"><option value="">Mês Cadastro</option></select>
+            <select class="sel" id="fTipo" onchange="renderT()"><option value="">Tipo</option></select>
+            <select class="sel" id="fBoleto" onchange="renderT()"><option value="">Boleto</option></select>
+            <select class="sel" id="fMalote" onchange="renderT()"><option value="">Malote</option></select>
+            <select class="sel" id="fEtapa" onchange="renderT()"><option value="">Etapa</option></select>
+            <input class="srch" id="busca" placeholder="Buscar..." oninput="renderT()">
+            <button class="btn btn-pri btn-sm" onclick="nova()">+ Nova Nota</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:24px"></th>
+                <th onclick="sort('Data Cadastro')">Data Cadastro</th>
+                <th onclick="sort('Mês Cadastro')">Mês Cadastro</th>
+                <th onclick="sort('Fornecedor')" style="min-width:100px">Fornecedor</th>
+                <th onclick="sort('Tipo')">Tipo</th>
+                <th onclick="sort('Número')">Número</th>
+                <th onclick="sort('Boleto')">Boleto</th>
+                <th title="BOL impresso">BOL</th>
+                <th title="NF impresso">NF</th>
+                <th title="BOL digital">BOL2</th>
+                <th title="NF digital">NF2</th>
+                <th onclick="sort('SOL/PED')">SOL/PED</th>
+                <th onclick="sort('Totalização')">Totalização</th>
+                <th>AP</th>
+                <th>Servidor</th>
+                <th>E-mail</th>
+                <th onclick="sort('Carimbo')">Carimbo</th>
+                <th onclick="sort('Ass. Eng.')">Ass. Eng.</th>
+                <th onclick="sort('Malote')">Malote</th>
+                <th onclick="sort('Observações')">Observações</th>
+                <th style="width:56px">Ações</th>
+              </tr></thead>
+              <tbody id="tb"></tbody>
+            </table>
+          </div>
+          <div class="pag">
+            <span id="tbInfo"></span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button class="btn btn-out btn-sm" id="pgAnt" onclick="mp(-1)">&lt;</button>
+              <span style="padding:0 8px;font-size:.8rem" id="pgInfo">1/1</span>
+              <button class="btn btn-out btn-sm" id="pgProx" onclick="mp(1)">&gt;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA INDICADORES -->
+    <div id="tab-indicadores" class="tab-content">
+      <div class="tc">
+        <div class="ic-grid" id="statsCards"></div>
+      </div>
+    </div>
+
+    <!-- ABA TIMELINE -->
+    <div id="tab-timeline" class="tab-content">
+      <div class="tc">
+        <div class="card" style="padding:14px">
+          <h2 style="font-size:1rem;font-weight:700;color:var(--nv);margin-bottom:10px">Timeline de Atividades</h2>
+          <div class="tl-header">
+            <input class="srch" id="tlBusca" placeholder="Filtrar timeline..." style="width:100%" oninput="renderTL()">
+          </div>
+          <div class="tl-list" id="tlList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA/EDITAR NOTA -->
+<div id="notaModal" class="modal hidden" onclick="if(event.target===this)fecharNM()">
+  <div class="mc">
+    <h2 id="modalTitle">Nova Nota</h2>
+    <form id="notaForm" class="fg" onsubmit="salvarN(event)">
+      <div><label class="fl">Data Cadastro</label><input class="fi" id="fData" type="date"></div>
+      <div><label class="fl">Mês Cadastro</label>
+        <select class="fi" id="fMesF"><option value="">Selecione</option><option>Abril</option><option>Maio</option><option>Junho</option><option>Julho</option><option>Agosto</option><option>Setembro</option><option>Outubro</option><option>Novembro</option><option>Dezembro</option><option>Janeiro</option><option>Fevereiro</option><option>Marco</option></select>
+      </div>
+      <div class="fc">
+        <label class="fl">Fornecedor</label>
+        <div class="ac-wrap" style="width:100%">
+          <input class="fi" id="fForn" placeholder="Digite o nome do fornecedor" autocomplete="off">
+          <div class="ac-list" id="acList"></div>
+        </div>
+      </div>
+      <div><label class="fl">Tipo</label><select class="fi" id="fTipoF"><option value="">Selecione</option><option>Material</option><option>Servico</option></select></div>
+      <div><label class="fl">Tipo Documento</label><select class="fi" id="fDocF"><option value="">Selecione</option><option>NF</option><option>REC</option><option>FAT</option><option>BOL</option><option>Outro</option></select></div>
+      <div><label class="fl">Número</label><input class="fi" id="fNum" placeholder="Nº nota/pedido"></div>
+      <div><label class="fl">Boleto</label><select class="fi" id="fBolF"><option value="">Selecione</option><option>OK</option><option>PIX</option><option>BOL</option><option>Solicitado</option><option>A solicitar</option></select></div>
+      <div class="fc">
+        <label class="fl">BOL / NF</label>
+        <div class="cg">
+          <label><input type="checkbox" class="cbx" id="fBOL"> BOL</label>
+          <label><input type="checkbox" class="cbx" id="fNF"> NF</label>
+          <label><input type="checkbox" class="cbx" id="fBOL2"> BOL2</label>
+          <label><input type="checkbox" class="cbx" id="fNF2"> NF2</label>
+        </div>
+      </div>
+      <div><label class="fl">SOL/PED</label><select class="fi" id="fSol"><option value="">Selecione</option><option>Solicitação</option><option>Contrato</option><option>Pedido</option><option>Aguarde med</option><option>Aguarde ped</option></select></div>
+      <div><label class="fl">Totalização</label><select class="fi" id="fTotal"><option value="">Selecione</option><option>A solicitar</option><option>Aguarde</option><option>OK</option></select></div>
+      <div><label class="fl">AP</label><input type="checkbox" class="cbx" id="fAP" style="margin-top:6px"></div>
+      <div><label class="fl">Servidor</label><input type="checkbox" class="cbx" id="fServ" style="margin-top:6px"></div>
+      <div><label class="fl">E-mail</label><input type="checkbox" class="cbx" id="fEmail" style="margin-top:6px"></div>
+      <div><label class="fl">Carimbo</label><select class="fi" id="fCar"><option value="">Selecione</option><option>Aguarde</option><option>X</option></select></div>
+      <div><label class="fl">Ass. Eng.</label><select class="fi" id="fAss"><option value="">Selecione</option><option>Aguarde</option><option>X</option></select></div>
+      <div><label class="fl">Malote</label><select class="fi" id="fMal"><option value="">Selecione</option><option>Enviado</option><option>Depositado</option><option>Cancelado</option></select></div>
+      <div class="fc"><label class="fl">Observações</label><input class="fi" id="fObs" placeholder="Observações"></div>
+      <input type="hidden" id="fIdx" value="-1">
+      <div class="fc flex justify-end gap-2 mt-1">
+        <button type="button" class="btn btn-out" onclick="fecharNM()">Cancelar</button>
+        <button type="submit" class="btn btn-pri">Salvar Nota</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL UPLOAD -->
+<div id="upModal" class="modal hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="mc" style="max-width:440px">
+    <h2>Upload Excel</h2>
+    <p class="text-sm text-gray-500 mb-3">Selecione um arquivo .xlsx para importar os dados.</p>
+    <input type="file" id="upFile" accept=".xlsx" class="fi mb-3">
+    <div class="flex justify-end gap-2">
+      <button class="btn btn-out" onclick="fecharUP()">Cancelar</button>
+      <button class="btn btn-pri" onclick="upload()">Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BACKUPS -->
+<div id="histModal" class="modal hidden" onclick="if(event.target===this)fecharHM()">
+  <div class="mc mc-tl" style="max-width:500px">
+    <h2>Histórico de Backups</h2>
+    <div id="histList" style="max-height:55vh;overflow-y:auto"></div>
+    <div class="flex justify-end mt-3"><button class="btn btn-out" onclick="fecharHM()">Fechar</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div id="confModal" class="modal hidden" onclick="if(event.target===this)fecharConf()">
+  <div class="mc" style="max-width:380px">
+    <h2 id="confTitle">Confirmar</h2>
+    <p id="confMsg" class="text-sm text-gray-600 mb-3"></p>
+    <div class="flex justify-end gap-2">
+      <button class="btn btn-out" onclick="fecharConf()">Cancelar</button>
+      <button class="btn btn-del" id="confBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var D = [];
+var FMap = {};
+var FD = [];
+var SK = null;
+var SD = 1;
+var PG = 1;
+var PP = 50;
+var EI = -1;
+
+// Original column headers (used internally and for export mapping)
+var H = ['Data Cadastro','Mês Cadastro','Fornecedor','Tipo','Boleto','BOL','NF','BOL2','NF2','SOL/PED','Totalização','AP','Servidor','E-mail','Carimbo','Ass. Eng.','Malote','Observações'];
+
+// ---- Helpers ----
+function td(v) { return v != null && v !== '' ? String(v) : '-'; }
+
+function bg(t) {
+  if (!t || t === '-') return '<span class="bdg bg-z">-</span>';
+  var s = t.toLowerCase();
+  if (s === 'ok' || s === 'enviado' || s === 'pedido') return '<span class="bdg bg-g">' + t + '</span>';
+  if (s === 'pix' || s === 'contrato') return '<span class="bdg bg-b">' + t + '</span>';
+  if (s === 'cancelado' || s === '#n/a') return '<span class="bdg bg-r">' + t + '</span>';
+  if (s === 'depositado' || s === 'solicitado' || s === 'solicitação') return '<span class="bdg bg-y">' + t + '</span>';
+  if (s.indexOf('aguarde') >= 0 || s.indexOf('solicitar') >= 0) return '<span class="bdg bg-p">' + t + '</span>';
+  return '<span class="bdg bg-z">' + t + '</span>';
+}
+
+function ck(v) { return v === true || v === 'X' ? '\u2611' : '\u2610'; }
+
+function etapas(r) {
+  var cols = ['BOL','NF','BOL2','NF2','AP','Servidor','E-mail','Carimbo','Ass. Eng.','Malote','SOL/PED','Totalização','Boleto'];
+  var t = cols.length, d = 0;
+  cols.forEach(function(c) {
+    var v = r[c];
+    if (v === true || v === 'X' || (typeof v === 'string' && ['OK','Enviado','Depositado','Pedido','Contrato'].indexOf(v) >= 0)) d++;
+    else if (c === 'Malote' && v === 'Enviado') d++;
+    else if (c === 'Boleto' && ['OK','PIX','BOL'].indexOf(v) >= 0) d++;
+    else if (c === 'SOL/PED' && v && v.toLowerCase().indexOf('aguarde') < 0) d++;
+  });
+  return Math.round(d / t * 100);
+}
+
+function forn(r) { return r['Fornecedor'] || '??'; }
+function doc(r) { return r['Tipo Documento'] || 'NF'; }
+
+// ---- Audit log ----
+function rh(n, msg) {
+  if (!n.historico) n.historico = [];
+  n.historico.push({ ts: new Date().toISOString().replace('T', ' ').slice(0, 19), msg: msg });
+}
+
+function histMsg(n, acao) {
+  var d = doc(n), f = forn(n);
+  switch (acao) {
+    case 'solicitacao': return 'Igor abriu solicitação da ' + d + ' do fornecedor ' + f;
+    case 'contrato': return 'Igor lançou autorização da medição de contrato ' + d + ' do fornecedor ' + f;
+    case 'pedido': return 'Igor deu baixa no pedido ' + d + ' do fornecedor ' + f;
+    case 'aguarde med': return 'Aguardando autorização da medição para prosseguir ' + d + ' do fornecedor ' + f;
+    case 'aguarde ped': return 'Aguardando autorização do pedido de compra para prosseguir ' + d + ' do fornecedor ' + f;
+    case 'solicitar (tot)': return 'Igor está preparando as instruções de totalização ' + d + ' do fornecedor ' + f;
+    case 'aguarde (tot)': return 'Instruções de totalização enviadas, aguardando retorno de suprimentos ' + d + ' do fornecedor ' + f;
+    case 'ok (tot)': return 'Instruções de totalização executadas ' + d + ' do fornecedor ' + f;
+    case 'solicitado (bol)': return 'Boleto solicitado ao fornecedor ' + f;
+    case 'bol (bol)': return 'Boleto recebido do fornecedor ' + f;
+    case 'ap': return 'AP da ' + d + ' do fornecedor ' + f + ' emitida';
+    case 'servidor': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' inseridos no servidor';
+    case 'email': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' enviados por e-mail';
+    case 'aguarde (car)': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' enviados para carimbo do almoxarife';
+    case 'x (car)': return d + ' do fornecedor ' + f + ' baixada(o) pelo almoxarife';
+    case 'aguarde (eng)': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' enviados para assinatura da engenheira';
+    case 'x (eng)': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' assinados pela engenheira';
+    case 'depositado (mal)': return 'Arquivos da ' + d + ' do fornecedor ' + f + ' depositados no malote';
+    case 'enviado (mal)': return 'Malote com os arquivos da ' + d + ' do fornecedor ' + f + ' enviado ao escritório';
+    default: return acao;
+  }
+}
+
+function checkHist(n, campo, nv, ov) {
+  if (nv === ov) return;
+  if (campo === 'SOL/PED') {
+    var m = { 'Solicitação': 'solicitacao', 'Contrato': 'contrato', 'Pedido': 'pedido', 'Aguarde med': 'aguarde med', 'Aguarde ped': 'aguarde ped' };
+    if (m[nv]) rh(n, histMsg(n, m[nv]));
+  }
+  if (campo === 'Totalização') {
+    var m2 = { 'A solicitar': 'solicitar (tot)', 'Aguarde': 'aguarde (tot)', 'OK': 'ok (tot)' };
+    if (m2[nv]) rh(n, histMsg(n, m2[nv]));
+  }
+  if (campo === 'Boleto') {
+    if (nv === 'Solicitado') rh(n, histMsg(n, 'solicitado (bol)'));
+    if (nv === 'BOL') rh(n, histMsg(n, 'bol (bol)'));
+  }
+  if (campo === 'AP' && nv === true) rh(n, histMsg(n, 'ap'));
+  if (campo === 'Servidor' && nv === true) rh(n, histMsg(n, 'servidor'));
+  if (campo === 'E-mail' && nv === true) rh(n, histMsg(n, 'email'));
+  if (campo === 'Carimbo' && nv === 'Aguarde') rh(n, histMsg(n, 'aguarde (car)'));
+  if (campo === 'Carimbo' && nv === 'X') rh(n, histMsg(n, 'x (car)'));
+  if (campo === 'Ass. Eng.' && nv === 'Aguarde') rh(n, histMsg(n, 'aguarde (eng)'));
+  if (campo === 'Ass. Eng.' && nv === 'X') rh(n, histMsg(n, 'x (eng)'));
+  if (campo === 'Malote' && nv === 'Depositado') rh(n, histMsg(n, 'depositado (mal)'));
+  if (campo === 'Malote' && nv === 'Enviado') rh(n, histMsg(n, 'enviado (mal)'));
+}
+
+// ---- Tracking timestamps ----
+function atualizarTS(obj, old) {
+  var now = new Date().toISOString();
+  if (obj['SOL/PED'] === 'Solicitação' && (!old || old['SOL/PED'] !== 'Solicitação')) obj._ts_solicitacao = now;
+  else if (old && obj['SOL/PED'] !== 'Solicitação' && old['SOL/PED'] === 'Solicitação') obj._ts_solicitacao = null;
+  else if (old) obj._ts_solicitacao = old._ts_solicitacao;
+
+  if (obj['Totalização'] === 'Aguarde' && (!old || old['Totalização'] !== 'Aguarde')) obj._ts_aguarde_total = now;
+  else if (old && obj['Totalização'] !== 'Aguarde' && old['Totalização'] === 'Aguarde') obj._ts_aguarde_total = null;
+  else if (old) obj._ts_aguarde_total = old._ts_aguarde_total;
+
+  if (obj['Carimbo'] === 'Aguarde' && (!old || old['Carimbo'] !== 'Aguarde')) obj._ts_aguarde_carimbo = now;
+  else if (old && obj['Carimbo'] !== 'Aguarde' && old['Carimbo'] === 'Aguarde') obj._ts_aguarde_carimbo = null;
+  else if (old) obj._ts_aguarde_carimbo = old._ts_aguarde_carimbo;
+
+  if (obj['Ass. Eng.'] === 'Aguarde' && (!old || old['Ass. Eng.'] !== 'Aguarde')) obj._ts_aguarde_eng = now;
+  else if (old && obj['Ass. Eng.'] !== 'Aguarde' && old['Ass. Eng.'] === 'Aguarde') obj._ts_aguarde_eng = null;
+  else if (old) obj._ts_aguarde_eng = old._ts_aguarde_eng;
+
+  if (obj['Malote'] === 'Depositado' && (!old || old['Malote'] !== 'Depositado')) obj._ts_depositado = now;
+  else if (old && obj['Malote'] !== 'Depositado' && old['Malote'] === 'Depositado') obj._ts_depositado = null;
+  else if (old) obj._ts_depositado = old._ts_depositado;
+}
+
+// ---- Indicators ----
+function calcCards() {
+  var now = new Date();
+  var diaSem = now.getDay();
+  function daysAgo(ts) {
+    if (!ts) return Infinity;
+    var d = new Date(ts);
+    return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  }
+  var bolPend = D.filter(function(r) { return r['Boleto'] === 'Solicitado'; }).length;
+  var sol10d = D.filter(function(r) { return r['SOL/PED'] === 'Solicitação' && daysAgo(r._ts_solicitacao) > 10; }).length;
+  var pend2d = D.filter(function(r) {
+    if (r['Totalização'] === 'Aguarde' && daysAgo(r._ts_aguarde_total) > 2) return true;
+    if (r['Carimbo'] === 'Aguarde' && daysAgo(r._ts_aguarde_carimbo) > 2) return true;
+    if (r['Ass. Eng.'] === 'Aguarde' && daysAgo(r._ts_aguarde_eng) > 2) return true;
+    return false;
+  }).length;
+  var carEng2d = D.filter(function(r) {
+    if (r['Carimbo'] === 'Aguarde' && daysAgo(r._ts_aguarde_carimbo) > 2) return true;
+    if (r['Ass. Eng.'] === 'Aguarde' && daysAgo(r._ts_aguarde_eng) > 2) return true;
+    return false;
+  }).length;
+  var malAtrasado = 0;
+  if (diaSem >= 4) {
+    malAtrasado = D.filter(function(r) { return r['Malote'] === 'Depositado'; }).length;
+  }
+  document.getElementById('statsCards').innerHTML =
+    '<div class="ic ic-red"><div class="ic-val">' + bolPend + '</div><div class="ic-label">Boletos Pendentes</div><div class="ic-desc">Status: Solicitado</div></div>' +
+    '<div class="ic ic-orange"><div class="ic-val">' + sol10d + '</div><div class="ic-label">Solicitações +10 dias</div><div class="ic-desc">SOL/PED como Solicitação há mais de 10 dias</div></div>' +
+    '<div class="ic ic-yellow"><div class="ic-val">' + pend2d + '</div><div class="ic-label">Pendências +2 dias</div><div class="ic-desc">Totalização, Carimbo ou Ass. Eng. como Aguarde há mais de 2 dias</div></div>' +
+    '<div class="ic ic-blue"><div class="ic-val">' + carEng2d + '</div><div class="ic-label">Carimbo/Eng. +2 dias</div><div class="ic-desc">Carimbo ou Ass. Eng. como Aguarde há mais de 2 dias</div></div>' +
+    '<div class="ic ic-purple"><div class="ic-val">' + malAtrasado + '</div><div class="ic-label">Malote Atrasado</div><div class="ic-desc">' + (diaSem >= 4 ? 'Depositado e ainda não enviado (já é ' + ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][diaSem] + ')' : 'Aguardando quinta-feira para verificar') + '</div></div>';
+}
+
+// ---- Table ----
+function filtrar() {
+  var fmes = document.getElementById('fMes').value;
+  var ftipo = document.getElementById('fTipo').value;
+  var fbol = document.getElementById('fBoleto').value;
+  var fmal = document.getElementById('fMalote').value;
+  var fet = document.getElementById('fEtapa').value;
+  var busca = document.getElementById('busca').value.toLowerCase();
+
+  FD = D.filter(function(r) {
+    if (fmes && r['Mês Cadastro'] !== fmes) return false;
+    if (ftipo && r['Tipo'] !== ftipo) return false;
+    if (fbol && r['Boleto'] !== fbol) return false;
+    if (fmal) { var m = r['Malote'] || ''; if (fmal === 'Pendente' && m !== '' && m !== '-') return false; if (fmal !== 'Pendente' && m !== fmal) return false; }
+    if (fet) { var p = etapas(r); if (fet === 'ok' && p < 80) return false; if (fet === 'med' && (p < 30 || p >= 80)) return false; if (fet === 'inicio' && p >= 30) return false; }
+    if (busca) { var vals = Object.values(r).filter(function(v) { return v != null; }).join(' ').toLowerCase(); if (vals.indexOf(busca) < 0) return false; }
+    return true;
+  });
+
+  if (SK) {
+    FD.sort(function(a, b) {
+      var va = (a[SK] || '').toString().toLowerCase();
+      var vb = (b[SK] || '').toString().toLowerCase();
+      return va.localeCompare(vb, 'pt') * SD;
+    });
+  }
+  popFiltros();
+  PG = 1;
+}
+
+function popFiltros() {
+  ['fMes','fTipo','fBoleto'].forEach(function(id) {
+    var campo = { 'fMes': 'Mês Cadastro', 'fTipo': 'Tipo', 'fBoleto': 'Boleto' }[id];
+    var vals = new Set(D.map(function(r) { return r[campo]; }).filter(Boolean));
+    var sel = document.getElementById(id);
+    var cur = sel.value;
+    var firstText = sel.options[0].text;
+    sel.innerHTML = '<option value="">' + firstText + '</option>';
+    vals.forEach(function(v) { sel.innerHTML += '<option value="' + v + '">' + v + '</option>'; });
+    if (cur && vals.has(cur)) sel.value = cur;
+  });
+  // Malote filter
+  var fMal = document.getElementById('fMalote');
+  var curM = fMal.value;
+  var malVals = new Set(D.map(function(r) { return r['Malote']; }).filter(Boolean));
+  fMal.innerHTML = '<option value="">Malote</option><option value="Pendente">Pendente</option>';
+  malVals.forEach(function(v) { fMal.innerHTML += '<option value="' + v + '">' + v + '</option>'; });
+  if (curM) fMal.value = curM;
+  // Etapa filter
+  var fEt = document.getElementById('fEtapa');
+  var curE = fEt.value;
+  fEt.innerHTML = '<option value="">Etapa</option><option value="inicio">Início</option><option value="med">Meio</option><option value="ok">Concluído</option>';
+  if (curE) fEt.value = curE;
+}
+
+function renderT() {
+  filtrar();
+  var t = FD.length, pgs = Math.max(1, Math.ceil(t / PP));
+  if (PG > pgs) PG = pgs;
+  var start = (PG - 1) * PP, pg = FD.slice(start, start + PP);
+  var tb = document.getElementById('tb');
+
+  if (!pg.length) {
+    tb.innerHTML = '<tr><td colspan="21" class="empty">Nenhum registro encontrado</td></tr>';
+  } else {
+    tb.innerHTML = pg.map(function(r, i) {
+      var idx = D.indexOf(r);
+      var busca = document.getElementById('busca').value;
+      function hl(txt) {
+        if (!txt || txt === '-') return td(txt);
+        var s = String(txt);
+        if (!busca) return s;
+        var re = new RegExp('(' + busca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return s.replace(re, '<span class="hl">$1</span>');
+      }
+      var obs = r['Observações'] || '';
+      return '<tr class="exp-row" onclick="toggleH(' + idx + ')">' +
+        '<td style="cursor:pointer;text-align:center;font-size:.7rem">&#9656;</td>' +
+        '<td>' + hl(r['Data Cadastro']) + '</td>' +
+        '<td>' + hl(r['Mês Cadastro']) + '</td>' +
+        '<td><strong>' + hl(r['Fornecedor']) + '</strong></td>' +
+        '<td>' + hl(r['Tipo']) + '</td>' +
+        '<td>' + hl(r['Número']) + '</td>' +
+        '<td>' + bg(r['Boleto']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['BOL']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['NF']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['BOL2']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['NF2']) + '</td>' +
+        '<td>' + bg(r['SOL/PED']) + '</td>' +
+        '<td>' + bg(r['Totalização']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['AP']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['Servidor']) + '</td>' +
+        '<td style="text-align:center">' + ck(r['E-mail']) + '</td>' +
+        '<td>' + bg(r['Carimbo']) + '</td>' +
+        '<td>' + bg(r['Ass. Eng.']) + '</td>' +
+        '<td>' + bg(r['Malote']) + '</td>' +
+        '<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis" title="' + obs.replace(/"/g,'&quot;') + '">' + hl(obs) + '</td>' +
+        '<td style="text-align:center;white-space:nowrap">' +
+        '<button class="btn btn-out btn-sm" onclick="event.stopPropagation();editar(' + idx + ')" title="Editar">&#9998;</button> ' +
+        '<button class="btn btn-out btn-sm" onclick="event.stopPropagation();excluir(' + idx + ')" title="Excluir" style="color:#dc2626">&#128465;</button>' +
+        '</td></tr>' +
+        '<tr class="exp-panel" id="h_' + idx + '"><td colspan="21"><div id="hc_' + idx + '"></div></td></tr>';
+    }).join('');
+  }
+
+  document.getElementById('tbInfo').textContent = t + ' registro(s) - ' + (start + 1) + '-' + Math.min(start + PP, t) + ' de ' + t;
+  document.getElementById('pgInfo').textContent = PG + '/' + pgs;
+  document.getElementById('pgAnt').style.opacity = PG <= 1 ? '.4' : '1';
+  document.getElementById('pgProx').style.opacity = PG >= pgs ? '.4' : '1';
+}
+
+function toggleH(idx) {
+  var el = document.getElementById('h_' + idx), c = document.getElementById('hc_' + idx);
+  if (el.classList.contains('open')) { el.classList.remove('open'); return; }
+  el.classList.add('open');
+  var r = D[idx];
+  if (!r.historico || !r.historico.length) {
+    c.innerHTML = '<div style="padding:6px 0;color:#94a3b8;font-size:.78rem">Nenhum registro de atividade.</div>';
+    return;
+  }
+  c.innerHTML = r.historico.slice().reverse().map(function(h) {
+    return '<div class="tl-item"><span class="ts">' + (h.ts ? h.ts.slice(0, 16) : '') + '</span> - ' + h.msg + '</div>';
+  }).join('');
+}
+
+function mp(d) { PG += d; renderT(); }
+function sort(k) { if (SK === k) SD *= -1; else { SK = k; SD = 1; } renderT(); }
+
+// ---- Autocomplete ----
+function configAC() {
+  var inp = document.getElementById('fForn');
+  if (!inp) return;
+  var timer = null;
+  inp.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      var v = inp.value.toLowerCase(), list = document.getElementById('acList');
+      if (!v || v.length < 1) { list.style.display = 'none'; return; }
+      var sugs = Object.keys(FMap).filter(function(f) { return f.toLowerCase().indexOf(v) >= 0; }).sort();
+      if (!sugs.length) { list.style.display = 'none'; return; }
+      list.innerHTML = sugs.map(function(s) {
+        return '<div onclick="selF(\'' + s.replace(/'/g, "\\'") + '\')">' + s + '</div>';
+      }).join('');
+      list.style.display = 'block';
+    }, 150);
+  });
+  inp.addEventListener('blur', function() { setTimeout(function() { document.getElementById('acList').style.display = 'none'; }, 200); });
+}
+
+function selF(nome) {
+  document.getElementById('fForn').value = nome;
+  document.getElementById('acList').style.display = 'none';
+  if (FMap[nome]) document.getElementById('fDocF').value = FMap[nome];
+}
+
+// ---- CRUD ----
+function nova() {
+  EI = -1;
+  document.getElementById('modalTitle').textContent = 'Nova Nota';
+  document.getElementById('notaForm').reset();
+  document.getElementById('fIdx').value = '-1';
+  document.getElementById('notaModal').classList.remove('hidden');
+}
+
+function editar(idx) {
+  EI = idx;
+  document.getElementById('modalTitle').textContent = 'Editar Nota';
+  var r = D[idx];
+  document.getElementById('fData').value = r['Data Cadastro'] || '';
+  document.getElementById('fMesF').value = r['Mês Cadastro'] || '';
+  document.getElementById('fForn').value = r['Fornecedor'] || '';
+  document.getElementById('fTipoF').value = r['Tipo'] || '';
+  document.getElementById('fDocF').value = r['Tipo Documento'] || '';
+  document.getElementById('fNum').value = r['Número'] != null ? String(r['Número']) : '';
+  document.getElementById('fBolF').value = r['Boleto'] || '';
+  document.getElementById('fBOL').checked = r['BOL'] === 'X' || r['BOL'] === true;
+  document.getElementById('fNF').checked = r['NF'] === 'X' || r['NF'] === true;
+  document.getElementById('fBOL2').checked = r['BOL2'] === 'X' || r['BOL2'] === true;
+  document.getElementById('fNF2').checked = r['NF2'] === 'X' || r['NF2'] === true;
+  document.getElementById('fSol').value = r['SOL/PED'] || '';
+  document.getElementById('fTotal').value = r['Totalização'] || '';
+  document.getElementById('fAP').checked = r['AP'] === 'X' || r['AP'] === true;
+  document.getElementById('fServ').checked = r['Servidor'] === 'X' || r['Servidor'] === true;
+  document.getElementById('fEmail').checked = r['E-mail'] === 'X' || r['E-mail'] === true;
+  document.getElementById('fCar').value = r['Carimbo'] || '';
+  document.getElementById('fAss').value = r['Ass. Eng.'] || '';
+  document.getElementById('fMal').value = r['Malote'] || '';
+  document.getElementById('fObs').value = r['Observações'] || '';
+  document.getElementById('fIdx').value = idx;
+  document.getElementById('notaModal').classList.remove('hidden');
+}
+
+function fecharNM() { document.getElementById('notaModal').classList.add('hidden'); }
+
+function salvarN(e) {
+  e.preventDefault();
+  var fornNome = document.getElementById('fForn').value.trim();
+  var docNome = document.getElementById('fDocF').value;
+  if (fornNome && docNome) FMap[fornNome] = docNome;
+
+  var obj = {
+    'Data Cadastro': document.getElementById('fData').value || null,
+    'Mês Cadastro': document.getElementById('fMesF').value || null,
+    'Fornecedor': fornNome || null,
+    'Tipo': document.getElementById('fTipoF').value || null,
+    'Tipo Documento': docNome || null,
+    'Número': document.getElementById('fNum').value || null,
+    'Boleto': document.getElementById('fBolF').value || null,
+    'BOL': document.getElementById('fBOL').checked,
+    'NF': document.getElementById('fNF').checked,
+    'BOL2': document.getElementById('fBOL2').checked,
+    'NF2': document.getElementById('fNF2').checked,
+    'SOL/PED': document.getElementById('fSol').value || null,
+    'Totalização': document.getElementById('fTotal').value || null,
+    'AP': document.getElementById('fAP').checked,
+    'Servidor': document.getElementById('fServ').checked,
+    'E-mail': document.getElementById('fEmail').checked,
+    'Carimbo': document.getElementById('fCar').value || null,
+    'Ass. Eng.': document.getElementById('fAss').value || null,
+    'Malote': document.getElementById('fMal').value || null,
+    'Observações': document.getElementById('fObs').value || null,
+    historico: []
+  };
+
+  var idx = parseInt(document.getElementById('fIdx').value);
+  if (idx >= 0 && idx < D.length) {
+    obj.historico = D[idx].historico || [];
+    var old = D[idx];
+    ['SOL/PED','Totalização','Boleto','Carimbo','Ass. Eng.','Malote'].forEach(function(c) {
+      var nv = obj[c], ov = old[c];
+      if (nv !== ov && nv) checkHist(obj, c, nv, ov);
+    });
+    ['AP','Servidor','E-mail'].forEach(function(c) {
+      var nv = obj[c], ov = old[c] === 'X' || old[c] === true;
+      if (nv && !ov) checkHist(obj, c, true, false);
+    });
+    rh(obj, 'Igor editou os dados da ' + docNome + ' do fornecedor ' + fornNome);
+    atualizarTS(obj, old);
+    D[idx] = obj;
+  } else {
+    rh(obj, 'Igor iniciou lançamento do(a) ' + docNome + ' do fornecedor ' + fornNome);
+    atualizarTS(obj, null);
+    D.push(obj);
+  }
+  fecharNM();
+  calcCards();
+  renderT();
+  toast('Nota salva localmente. Clique "Salvar" para enviar ao servidor.', 'i');
+}
+
+function excluir(idx) {
+  document.getElementById('confTitle').textContent = 'Excluir Nota';
+  document.getElementById('confMsg').textContent = 'Deseja excluir a nota de "' + D[idx]['Fornecedor'] + '" (' + (D[idx]['Número'] || 'sem número') + ')?';
+  document.getElementById('confBtn').onclick = function() {
+    D.splice(idx, 1);
+    fecharConf();
+    calcCards();
+    renderT();
+    toast('Nota removida. Clique "Salvar" para persistir.', 'i');
+  };
+  document.getElementById('confModal').classList.remove('hidden');
+}
+function fecharConf() { document.getElementById('confModal').classList.add('hidden'); }
+
+// ---- Save / API ----
+function salvar() {
+  var btn = document.getElementById('btnSalvar');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  fetch('/api/dados', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(D)
+  }).then(function(res) { return res.json(); }).then(function(result) {
+    if (result.ok) {
+      toast('Dados salvos com sucesso! Backup criado.', 's');
+    } else {
+      toast('Erro: ' + result.error, 'e');
+    }
+  }).catch(function(err) {
+    toast('Erro ao salvar: ' + err.message, 'e');
+  }).finally(function() {
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
+  });
+}
+
+// ---- Excel Export (template-based) ----
+function baixarExcel() {
+  var b64 = localStorage.getItem('__template_xlsx');
+  if (!b64) {
+    toast('Nenhum template salvo. Faça upload do .xlsx primeiro.', 'e');
+    return;
+  }
+  try {
+    var wb = XLSX.read(b64, {type: 'base64'});
+    var ws = wb.Sheets[wb.SheetNames[0]];
+    var ref = XLSX.utils.decode_range(ws['!ref'] || 'A1:Z1');
+
+    // Build column map from template headers (row 1)
+    var colMap = {};
+    for (var C = ref.s.c; C <= ref.e.c; C++) {
+      var cell = ws[XLSX.utils.encode_cell({r: 0, c: C})];
+      if (cell) colMap[String(cell.v).trim()] = C;
+    }
+
+    // Delete old data rows
+    for (var R = 1; R <= ref.e.r; R++) {
+      for (var C2 = ref.s.c; C2 <= ref.e.c; C2++) {
+        delete ws[XLSX.utils.encode_cell({r: R, c: C2})];
+      }
+    }
+
+    // Write new data
+    D.forEach(function(row, i) {
+      var R = i + 1;
+      var colKeys = Object.keys(colMap);
+      colKeys.forEach(function(key) {
+        var C = colMap[key];
+        var v = row[key];
+        if (v == null || v === '') return;
+        if (['BOL','NF','BOL2','NF2','AP','Servidor','E-mail'].indexOf(key) >= 0) {
+          ws[XLSX.utils.encode_cell({r: R, c: C})] = {t: 's', v: v === true || v === 'X' ? 'X' : ''};
+        } else {
+          ws[XLSX.utils.encode_cell({r: R, c: C})] = {t: 's', v: String(v)};
+        }
+      });
+    });
+
+    // Preserve header merges, remove data merges
+    var merges = ws['!merges'] || [];
+    ws['!merges'] = merges.filter(function(m) { return m.s.r === 0; });
+
+    // Update range
+    var maxR = Math.max(1, D.length);
+    ws['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: maxR, c: ref.e.c}});
+
+    XLSX.writeFile(wb, 'Controle_notas.xlsx');
+    toast('Excel exportado com formatação original!', 's');
+  } catch(err) {
+    toast('Erro ao exportar: ' + err.message, 'e');
+  }
+}
+
+// ---- Excel Upload ----
+function abrirUpload() { document.getElementById('upModal').classList.remove('hidden'); }
+function fecharUP() { document.getElementById('upModal').classList.add('hidden'); }
+
+function upload() {
+  var file = document.getElementById('upFile').files[0];
+  if (!file) { toast('Selecione um arquivo .xlsx.', 'e'); return; }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    // Save template in base64
+    var b64 = arrayBufferToBase64(e.target.result);
+    localStorage.setItem('__template_xlsx', b64);
+
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var json = XLSX.utils.sheet_to_json(ws, { defval: null });
+      if (!json.length) { toast('Planilha vazia.', 'e'); return; }
+
+      // Convert checkbox values: "X" -> true for internal consistency
+      D = json.map(function(r) {
+        ['BOL','NF','BOL2','NF2','AP','Servidor','E-mail'].forEach(function(k) {
+          r[k] = r[k] === 'X' ? true : false;
+        });
+        r.historico = [];
+        return r;
+      });
+      buildFMap();
+      fecharUP();
+      calcCards();
+      renderT();
+      toast(json.length + ' registros importados! Clique "Salvar" para persistir.', 's');
+    } catch(err) { toast('Erro: ' + err.message, 'e'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function arrayBufferToBase64(buffer) {
+  var binary = '';
+  var bytes = new Uint8Array(buffer);
+  for (var i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+// ---- Timeline ----
+function renderTL() {
+  var busca = (document.getElementById('tlBusca').value || '').toLowerCase();
+  var todos = [];
+  D.forEach(function(r, i) {
+    if (r.historico) r.historico.forEach(function(h) {
+      todos.push({ ts: h.ts, msg: h.msg, forn: r['Fornecedor'] || '??', idx: i });
+    });
+  });
+  todos.sort(function(a, b) { return b.ts.localeCompare(a.ts); });
+  var f = busca ? todos.filter(function(t) { return (t.msg + ' ' + t.forn + ' ' + t.ts).toLowerCase().indexOf(busca) >= 0; }) : todos;
+  var list = document.getElementById('tlList');
+  if (!f.length) { list.innerHTML = '<div class="empty">Nenhuma atividade encontrada.</div>'; return; }
+  list.innerHTML = f.slice(0, 200).map(function(t) {
+    var cor = 'tl-blue';
+    if (t.msg.indexOf('baixada') >= 0 || t.msg.indexOf('executadas') >= 0 || t.msg.indexOf('assinados') >= 0 || t.msg.indexOf('emitida') >= 0) cor = 'tl-green';
+    if (t.msg.indexOf('Aguardando') >= 0 || t.msg.indexOf('preparando') >= 0 || t.msg.indexOf('solicitado') >= 0) cor = 'tl-yellow';
+    if (t.msg.indexOf('enviado') >= 0 || t.msg.indexOf('inseridos') >= 0 || t.msg.indexOf('depositados') >= 0) cor = 'tl-purple';
+    return '<div class="tl-item ' + cor + '"><span class="ts">' + (t.ts ? t.ts.slice(0, 16) : '') + '</span> - <strong>' + t.forn + '</strong>: ' + t.msg + '</div>';
+  }).join('');
+}
+
+// ---- Backup history ----
+function mostrarHist() {
+  document.getElementById('histModal').classList.remove('hidden');
+  document.getElementById('histList').textContent = 'Carregando...';
+  fetch('/api/historico').then(function(r) { return r.json(); }).then(function(backups) {
+    if (!backups.length) { document.getElementById('histList').innerHTML = '<div class="empty">Nenhum backup encontrado.</div>'; return; }
+    document.getElementById('histList').innerHTML = backups.map(function(b) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:6px">' +
+        '<span style="font-size:.85rem">' + b.date + '</span>' +
+        '<button class="btn btn-out btn-sm" onclick="restaurar(\'' + b.key + '\')">Restaurar</button></div>';
+    }).join('');
+  }).catch(function() {
+    document.getElementById('histList').innerHTML = '<div class="empty">Erro ao carregar backups.</div>';
+  });
+}
+function fecharHM() { document.getElementById('histModal').classList.add('hidden'); }
+
+function restaurar(key) {
+  fecharHM();
+  document.getElementById('confTitle').textContent = 'Restaurar Backup';
+  document.getElementById('confMsg').textContent = 'Deseja restaurar o backup "' + key + '"? Os dados atuais serão substituídos.';
+  document.getElementById('confBtn').onclick = function() {
+    fecharConf();
+    fetch('/api/restaurar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: key })
+    }).then(function(r) { return r.json(); }).then(function(result) {
+      if (result.ok) {
+        toast('Backup restaurado! Recarregando...', 's');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else { toast('Erro: ' + result.error, 'e'); }
+    }).catch(function(err) { toast('Erro ao restaurar: ' + err.message, 'e'); });
+  };
+  document.getElementById('confModal').classList.remove('hidden');
+}
+
+// ---- Tab switching ----
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
+  if (tab === 'indicadores') calcCards();
+  if (tab === 'timeline') renderTL();
+}
+
+// ---- Toast ----
+function toast(msg, tipo) {
+  var el = document.createElement('div');
+  el.className = 'toast toast-' + (tipo === 's' ? 's' : tipo === 'e' ? 'e' : 'i');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
+}
+
+// ---- Build FMap for autocomplete ----
+function buildFMap() {
+  FMap = {};
+  D.forEach(function(r) {
+    var f = r['Fornecedor'];
+    var d = r['Tipo Documento'];
+    if (f && d && !FMap[f]) FMap[f] = d;
+  });
+}
+
+// ---- Init ----
+function init() {
+  fetch('/api/dados').then(function(r) { return r.json(); }).then(function(data) {
+    if (data && data.length > 0) {
+      D = data;
+      D.forEach(function(r) { if (!r.historico) r.historico = []; });
+      buildFMap();
+    } else {
+      return fetch('/dados/seed.json').then(function(r) { return r.json(); }).then(function(seed) {
+        D = seed.map(function(r) {
+          ['BOL','NF','BOL2','NF2','AP','Servidor','E-mail'].forEach(function(k) {
+            r[k] = r[k] === 'X' ? true : false;
+          });
+          r.historico = [];
+          return r;
+        });
+        buildFMap();
+      }).catch(function() { D = []; });
+    }
+  }).catch(function() { D = []; }).finally(function() {
+    calcCards();
+    renderT();
+    configAC();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('main').classList.remove('hidden');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
