@@ -137,14 +137,7 @@ tr:hover td{background:#fafafa}
     <div id="tab-planilha" class="tab-content active">
       <div class="tc">
         <div class="card">
-          <div class="filtros">
-            <span style="font-size:.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Filtrar</span>
-            <select class="sel" id="fMes" onchange="renderT()"><option value="">Mês Cadastro</option></select>
-            <select class="sel" id="fTipo" onchange="renderT()"><option value="">Tipo</option></select>
-            <select class="sel" id="fBoleto" onchange="renderT()"><option value="">Boleto</option></select>
-            <select class="sel" id="fMalote" onchange="renderT()"><option value="">Malote</option></select>
-            <select class="sel" id="fEtapa" onchange="renderT()"><option value="">Etapa</option></select>
-            <input class="srch" id="busca" placeholder="Buscar..." oninput="renderT()">
+          <div class="filtros" style="justify-content:flex-end">
             <button class="btn btn-pri btn-sm" onclick="nova()">+ Nova Nota</button>
           </div>
           <div class="tbl-wrap">
@@ -211,9 +204,9 @@ tr:hover td{background:#fafafa}
     <div id="tab-fornecedores" class="tab-content">
       <div class="tc">
         <div class="card">
-          <div class="filtros">
+          <div class="filtros" style="padding:6px 10px;gap:4px">
             <span style="font-size:.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Fornecedores</span>
-            <input class="srch" id="buscaForn" placeholder="Buscar fornecedor..." oninput="renderFornecedores()">
+            <input class="srch" id="buscaForn" placeholder="Buscar fornecedor..." style="width:140px;padding:4px 7px 4px 24px;font-size:.75rem" oninput="renderFornecedores()">
             <button class="btn btn-pri btn-sm" onclick="novoForn()">+ Novo Fornecedor</button>
           </div>
           <div class="tbl-wrap">
@@ -489,23 +482,7 @@ function calcCards() {
 
 // ---- Table ----
 function filtrar() {
-  var fmes = document.getElementById('fMes').value;
-  var ftipo = document.getElementById('fTipo').value;
-  var fbol = document.getElementById('fBoleto').value;
-  var fmal = document.getElementById('fMalote').value;
-  var fet = document.getElementById('fEtapa').value;
-  var busca = document.getElementById('busca').value.toLowerCase();
-
-  FD = D.filter(function(r) {
-    if (fmes && r['Mês Cadastro'] !== fmes) return false;
-    if (ftipo && r['Tipo'] !== ftipo) return false;
-    if (fbol && r['Boleto'] !== fbol) return false;
-    if (fmal) { var m = r['Malote'] || ''; if (fmal === 'Pendente' && m !== '' && m !== '-') return false; if (fmal !== 'Pendente' && m !== fmal) return false; }
-    if (fet) { var p = etapas(r); if (fet === 'ok' && p < 80) return false; if (fet === 'med' && (p < 30 || p >= 80)) return false; if (fet === 'inicio' && p >= 30) return false; }
-    if (busca) { var vals = Object.values(r).filter(function(v) { return v != null; }).join(' ').toLowerCase(); if (vals.indexOf(busca) < 0) return false; }
-    return true;
-  });
-
+  FD = D.slice();
   if (SK) {
     FD.sort(function(a, b) {
       var va = (a[SK] || '').toString().toLowerCase();
@@ -513,33 +490,7 @@ function filtrar() {
       return va.localeCompare(vb, 'pt') * SD;
     });
   }
-  popFiltros();
   PG = 1;
-}
-
-function popFiltros() {
-  ['fMes','fTipo','fBoleto'].forEach(function(id) {
-    var campo = { 'fMes': 'Mês Cadastro', 'fTipo': 'Tipo', 'fBoleto': 'Boleto' }[id];
-    var vals = new Set(D.map(function(r) { return r[campo]; }).filter(Boolean));
-    var sel = document.getElementById(id);
-    var cur = sel.value;
-    var firstText = sel.options[0].text;
-    sel.innerHTML = '<option value="">' + firstText + '</option>';
-    vals.forEach(function(v) { sel.innerHTML += '<option value="' + v + '">' + v + '</option>'; });
-    if (cur && vals.has(cur)) sel.value = cur;
-  });
-  // Malote filter
-  var fMal = document.getElementById('fMalote');
-  var curM = fMal.value;
-  var malVals = new Set(D.map(function(r) { return r['Malote']; }).filter(Boolean));
-  fMal.innerHTML = '<option value="">Malote</option><option value="Pendente">Pendente</option>';
-  malVals.forEach(function(v) { fMal.innerHTML += '<option value="' + v + '">' + v + '</option>'; });
-  if (curM) fMal.value = curM;
-  // Etapa filter
-  var fEt = document.getElementById('fEtapa');
-  var curE = fEt.value;
-  fEt.innerHTML = '<option value="">Etapa</option><option value="inicio">Início</option><option value="med">Meio</option><option value="ok">Concluído</option>';
-  if (curE) fEt.value = curE;
 }
 
 function renderT() {
@@ -554,14 +505,7 @@ function renderT() {
   } else {
     tb.innerHTML = pg.map(function(r, i) {
       var idx = D.indexOf(r);
-      var busca = document.getElementById('busca').value;
-      function hl(txt) {
-        if (!txt || txt === '-') return td(txt);
-        var s = String(txt);
-        if (!busca) return s;
-        var re = new RegExp('(' + busca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        return s.replace(re, '<span class="hl">$1</span>');
-      }
+      function hl(txt) { return td(txt); }
       var obs = r['Observações'] || '';
       return '<tr class="exp-row" onclick="toggleH(' + idx + ')">' +
         '<td style="cursor:pointer;text-align:center;font-size:.7rem">&#9656;</td>' +
@@ -971,8 +915,10 @@ function salvarForn(e) {
   } else {
     S.push({ nome: nome, tipo: tipo, tipo_documento: doc });
   }
+  S.sort(function(a, b) { return a.nome.localeCompare(b.nome, 'pt'); });
   fecharFM();
   buildFMap();
+  sincronizarTipoDoc();
   fornecedoresSalvar();
   renderFornecedores();
   toast('Fornecedor salvo localmente.', 's');
@@ -986,6 +932,7 @@ function excluirForn(idx) {
     S.splice(idx, 1);
     fecharConf();
     buildFMap();
+    sincronizarTipoDoc();
     fornecedoresSalvar();
     renderFornecedores();
     toast('Fornecedor removido.', 'i');
@@ -1083,6 +1030,17 @@ function buildFMap() {
   });
 }
 
+function sincronizarTipoDoc() {
+  D.forEach(function(r) {
+    var f = r['Fornecedor'];
+    if (!f) return;
+    var sup = S.filter(function(s) { return s.nome === f; })[0];
+    if (sup && sup.tipo_documento && (!r['Tipo Documento'] || r['Tipo Documento'] !== sup.tipo_documento)) {
+      r['Tipo Documento'] = sup.tipo_documento;
+    }
+  });
+}
+
 // ---- Init ----
 function init() {
   fetch('/api/dados').then(function(r) { return r.json(); }).then(function(data) {
@@ -1121,7 +1079,9 @@ function init() {
         S.push({ nome: f, tipo: t || 'Material', tipo_documento: d || '' });
       }
     });
+    S.sort(function(a, b) { return a.nome.localeCompare(b.nome, 'pt'); });
     buildFMap();
+    sincronizarTipoDoc();
     calcCards();
     renderT();
     configAC();
