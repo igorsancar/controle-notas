@@ -99,6 +99,11 @@ tr:hover td{background:#fafafa}
 .exp-panel.open{display:table-row}
 .hl{background:#fef08a;padding:0 2px;border-radius:2px}
 #tbForn td,#tbForn th{padding:3px 5px}
+#tbForn th:nth-child(2),#tbForn td:nth-child(2),
+#tbForn th:nth-child(3),#tbForn td:nth-child(3),
+#tbForn th:nth-child(4),#tbForn td:nth-child(4){
+  width:1%;white-space:nowrap
+}
 @media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -227,11 +232,11 @@ tr:hover td{background:#fafafa}
             <button class="btn btn-pri btn-sm" onclick="novoForn()">+ Novo Fornecedor</button>
           </div>
           <div class="tbl-wrap">
-            <table style="table-layout:fixed">
+            <table>
               <thead><tr>
-                <th onclick="sortForn('nome')" style="white-space:normal">Fornecedor</th>
-                <th onclick="sortForn('tipo')" style="white-space:normal;width:80px">Tipo</th>
-                <th onclick="sortForn('tipo_documento')" style="white-space:normal;width:100px">Tipo Documento</th>
+                <th onclick="sortForn('nome')">Fornecedor</th>
+                <th onclick="sortForn('tipo')">Tipo</th>
+                <th onclick="sortForn('tipo_documento')">Tipo Documento</th>
                 <th style="width:56px">Ações</th>
               </tr></thead>
               <tbody id="tbForn"></tbody>
