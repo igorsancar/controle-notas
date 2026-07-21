@@ -203,10 +203,26 @@ tr:hover td{background:#fafafa}
     <!-- ABA FORNECEDORES -->
     <div id="tab-fornecedores" class="tab-content">
       <div class="tc">
+        <div class="grid grid-cols-3 gap-3 mb-3" id="fornStatsCards">
+          <div class="ic">
+            <div class="ic-val" id="fornTotal">0</div>
+            <div class="ic-label">Total de Fornecedores</div>
+          </div>
+          <div class="ic ic-green">
+            <div class="ic-val" id="fornMaterial">0</div>
+            <div class="ic-label">Materiais</div>
+          </div>
+          <div class="ic ic-blue">
+            <div class="ic-val" id="fornServico">0</div>
+            <div class="ic-label">Serviços</div>
+          </div>
+        </div>
         <div class="card">
-          <div class="filtros" style="padding:6px 10px;gap:4px">
-            <span style="font-size:.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Fornecedores</span>
-            <input class="srch" id="buscaForn" placeholder="Buscar fornecedor..." style="width:140px;padding:4px 7px 4px 24px;font-size:.75rem" oninput="renderFornecedores()">
+          <div class="filtros" style="justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:.82rem;font-weight:700;color:var(--nv)">Fornecedores</span>
+              <input class="srch" id="buscaForn" placeholder="Buscar fornecedor..." style="width:180px" oninput="renderFornecedores()">
+            </div>
             <button class="btn btn-pri btn-sm" onclick="novoForn()">+ Novo Fornecedor</button>
           </div>
           <div class="tbl-wrap">
@@ -849,7 +865,28 @@ function fornecedoresSalvar() {
   localStorage.setItem('fornecedores', JSON.stringify(S));
 }
 
+function calcFornCards() {
+  var total = S.length;
+  var mat = S.filter(function(s) { return s.tipo === 'Material'; }).length;
+  var serv = S.filter(function(s) { return s.tipo === 'Servico' || s.tipo === 'Serviço'; }).length;
+  document.getElementById('fornTotal').textContent = total;
+  document.getElementById('fornMaterial').textContent = mat;
+  document.getElementById('fornServico').textContent = serv;
+}
+
+function fornTipoBadge(t) {
+  var isServ = t === 'Servico' || t === 'Serviço';
+  return '<span class="bdg ' + (isServ ? 'bg-b' : 'bg-g') + '">' + (isServ ? 'Serviço' : 'Material') + '</span>';
+}
+
+function fornDocBadge(d) {
+  if (!d) return '<span class="bdg bg-z">-</span>';
+  var colors = { 'NF': 'bg-g', 'REC': 'bg-y', 'FAT': 'bg-p', 'BOL': 'bg-b' };
+  return '<span class="bdg ' + (colors[d] || 'bg-z') + '">' + d + '</span>';
+}
+
 function renderFornecedores() {
+  calcFornCards();
   var busca = (document.getElementById('buscaForn').value || '').toLowerCase();
   var list = S.filter(function(s) {
     if (!busca) return true;
@@ -864,14 +901,14 @@ function renderFornecedores() {
   }
   var tb = document.getElementById('tbForn');
   if (!list.length) {
-    tb.innerHTML = '<tr><td colspan="4" class="empty">Nenhum fornecedor encontrado</td></tr>';
+    tb.innerHTML = '<tr><td colspan="4"><div class="empty">Nenhum fornecedor encontrado</div></td></tr>';
   } else {
-    tb.innerHTML = list.map(function(s, i) {
+    tb.innerHTML = list.map(function(s) {
       var idx = S.indexOf(s);
       return '<tr>' +
         '<td><strong>' + s.nome + '</strong></td>' +
-        '<td>' + (s.tipo === 'Servico' ? 'Serviço' : s.tipo) + '</td>' +
-        '<td>' + (s.tipo_documento || '-') + '</td>' +
+        '<td>' + fornTipoBadge(s.tipo) + '</td>' +
+        '<td>' + fornDocBadge(s.tipo_documento) + '</td>' +
         '<td style="text-align:center;white-space:nowrap">' +
         '<button class="btn btn-out btn-sm" onclick="editarForn(' + idx + ')" title="Editar">&#9998;</button> ' +
         '<button class="btn btn-out btn-sm" onclick="excluirForn(' + idx + ')" title="Excluir" style="color:#dc2626">&#128465;</button>' +
