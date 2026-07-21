@@ -102,6 +102,10 @@ tr:hover td{background:#fafafa}
 #tblForn th{white-space:normal}
 #tbForn td:first-child{max-width:220px;overflow:hidden;text-overflow:ellipsis}
 #tbForn td,#tbForn th{padding:4px 8px}
+#statsCards{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:0}
+#statsCards .ic{padding:14px 16px;border-radius:8px}
+#statsCards .ic-val{font-size:1.3rem}
+#statsCards .ic-desc{font-size:.7rem}
 @media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -126,9 +130,10 @@ tr:hover td{background:#fafafa}
 
   <nav class="tab-bar">
     <button class="tab active" data-tab="planilha" onclick="switchTab('planilha')">Planilha</button>
-    <button class="tab" data-tab="indicadores" onclick="switchTab('indicadores')">Indicadores</button>
+    <button class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
     <button class="tab" data-tab="timeline" onclick="switchTab('timeline')">Timeline</button>
     <button class="tab" data-tab="fornecedores" onclick="switchTab('fornecedores')">Fornecedores</button>
+    <button class="tab" data-tab="automacao" onclick="switchTab('automacao')">Automação</button>
   </nav>
 
   <div id="loading" style="padding:60px 0;text-align:center;color:#94a3b8">
@@ -184,10 +189,35 @@ tr:hover td{background:#fafafa}
       </div>
     </div>
 
-    <!-- ABA INDICADORES -->
-    <div id="tab-indicadores" class="tab-content">
+    <!-- ABA DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content">
       <div class="tc">
         <div class="ic-grid" id="statsCards"></div>
+        <div class="card" style="margin-top:12px">
+          <div class="filtros" style="justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <input class="srch" id="dashBusca" placeholder="Buscar..." style="width:150px" oninput="renderDash()">
+              <select class="sel" id="dashMes" onchange="renderDash()"><option value="">Mês</option></select>
+              <select class="sel" id="dashForn" onchange="renderDash()"><option value="">Fornecedor</option></select>
+              <select class="sel" id="dashBol" onchange="renderDash()"><option value="">Boleto</option></select>
+            </div>
+            <button class="btn btn-pri btn-sm" onclick="nova()">+ Incluir Nota Fiscal</button>
+          </div>
+          <div class="tbl-wrap" style="max-height:320px">
+            <table>
+              <thead><tr>
+                <th onclick="sortDash('Fornecedor')">Fornecedor</th>
+                <th onclick="sortDash('Mês Cadastro')">Mês</th>
+                <th onclick="sortDash('Boleto')">Boleto</th>
+                <th onclick="sortDash('SOL/PED')">SOL/PED</th>
+                <th onclick="sortDash('Totalização')">Totalização</th>
+                <th onclick="sortDash('Carimbo')">Carimbo</th>
+                <th onclick="sortDash('Malote')">Malote</th>
+              </tr></thead>
+              <tbody id="dashTb"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -240,6 +270,16 @@ tr:hover td{background:#fafafa}
               <tbody id="tbForn"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA AUTOMAÇÃO -->
+    <div id="tab-automacao" class="tab-content">
+      <div class="tc">
+        <div class="card" style="padding:40px 20px;text-align:center;color:#94a3b8">
+          <div style="font-size:1.2rem;margin-bottom:6px">Automação</div>
+          <div style="font-size:.85rem">Em desenvolvimento</div>
         </div>
       </div>
     </div>
@@ -497,8 +537,67 @@ function calcCards() {
     '<div class="ic ic-orange"><div class="ic-val">' + sol10d + '</div><div class="ic-label">Solicitações +10 dias</div><div class="ic-desc">SOL/PED como Solicitação há mais de 10 dias</div></div>' +
     '<div class="ic ic-yellow"><div class="ic-val">' + pend2d + '</div><div class="ic-label">Pendências +2 dias</div><div class="ic-desc">Totalização, Carimbo ou Ass. Eng. como Aguarde há mais de 2 dias</div></div>' +
     '<div class="ic ic-blue"><div class="ic-val">' + carEng2d + '</div><div class="ic-label">Carimbo/Eng. +2 dias</div><div class="ic-desc">Carimbo ou Ass. Eng. como Aguarde há mais de 2 dias</div></div>' +
-    '<div class="ic ic-purple"><div class="ic-val">' + malAtrasado + '</div><div class="ic-label">Malote Atrasado</div><div class="ic-desc">' + (diaSem >= 4 ? 'Depositado e ainda não enviado (já é ' + ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][diaSem] + ')' : 'Aguardando quinta-feira para verificar') + '</div></div>';
+      '<div class="ic ic-purple"><div class="ic-val">' + malAtrasado + '</div><div class="ic-label">Malote Atrasado</div><div class="ic-desc">' + (diaSem >= 4 ? 'Depositado e ainda não enviado (já é ' + ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][diaSem] + ')' : 'Aguardando quinta-feira para verificar') + '</div></div>';
 }
+
+var DS_SK = null;
+var DS_SD = 1;
+
+function populateDashFilters() {
+  var meses = {}, forns = {}, bols = {};
+  D.forEach(function(r) {
+    if (r['Mês Cadastro']) meses[r['Mês Cadastro']] = 1;
+    if (r['Fornecedor']) forns[r['Fornecedor']] = 1;
+    if (r['Boleto']) bols[r['Boleto']] = 1;
+  });
+  var mSel = document.getElementById('dashMes');
+  if (mSel && mSel.options.length <= 1) {
+    Object.keys(meses).sort(function(a,b) { return ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].indexOf(a) - ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].indexOf(b); }).forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
+    var fSel = document.getElementById('dashForn');
+    Object.keys(forns).sort(function(a,b) { return a.localeCompare(b, 'pt'); }).forEach(function(f) { fSel.innerHTML += '<option>' + f + '</option>'; });
+    var bSel = document.getElementById('dashBol');
+    Object.keys(bols).forEach(function(b) { bSel.innerHTML += '<option>' + b + '</option>'; });
+  }
+}
+
+function renderDash() {
+  populateDashFilters();
+  var busca = (document.getElementById('dashBusca').value || '').toLowerCase();
+  var mes = document.getElementById('dashMes').value;
+  var forn = document.getElementById('dashForn').value;
+  var bol = document.getElementById('dashBol').value;
+  var list = D.filter(function(r) {
+    if (busca && (r['Fornecedor'] || '').toLowerCase().indexOf(busca) < 0 && (r['Número'] || '').toString().toLowerCase().indexOf(busca) < 0) return false;
+    if (mes && r['Mês Cadastro'] !== mes) return false;
+    if (forn && r['Fornecedor'] !== forn) return false;
+    if (bol && r['Boleto'] !== bol) return false;
+    return true;
+  });
+  if (DS_SK) {
+    list.sort(function(a, b) {
+      var va = (a[DS_SK] || '').toString().toLowerCase();
+      var vb = (b[DS_SK] || '').toString().toLowerCase();
+      return va.localeCompare(vb, 'pt') * DS_SD;
+    });
+  }
+  var tb = document.getElementById('dashTb');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum registro encontrado</td></tr>';
+  } else {
+    tb.innerHTML = list.map(function(r) {
+      return '<tr>' +
+        '<td><strong>' + td(r['Fornecedor']) + '</strong></td>' +
+        '<td>' + td(r['Mês Cadastro']) + '</td>' +
+        '<td>' + bg(r['Boleto']) + '</td>' +
+        '<td>' + bg(r['SOL/PED']) + '</td>' +
+        '<td>' + bg(r['Totalização']) + '</td>' +
+        '<td>' + bg(r['Carimbo']) + '</td>' +
+        '<td>' + bg(r['Malote']) + '</td></tr>';
+    }).join('');
+  }
+}
+
+function sortDash(k) { if (DS_SK === k) DS_SD *= -1; else { DS_SK = k; DS_SD = 1; } renderDash(); }
 
 // ---- Table ----
 function filtrar() {
@@ -700,7 +799,7 @@ function salvarN(e) {
     D.push(obj);
   }
   fecharNM();
-  calcCards();
+  calcCards(); renderDash();
   renderT();
   toast('Nota salva localmente. Clique "Salvar" para enviar ao servidor.', 'i');
 }
@@ -711,7 +810,7 @@ function excluir(idx) {
   document.getElementById('confBtn').onclick = function() {
     D.splice(idx, 1);
     fecharConf();
-    calcCards();
+    calcCards(); renderDash();
     renderT();
     toast('Nota removida. Clique "Salvar" para persistir.', 'i');
   };
@@ -1046,7 +1145,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(function(el) { el.classList.remove('active'); });
   document.getElementById('tab-' + tab).classList.add('active');
   document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
-  if (tab === 'indicadores') calcCards();
+  if (tab === 'dashboard') { calcCards(); renderDash(); }
   if (tab === 'timeline') renderTL();
   if (tab === 'fornecedores') renderFornecedores();
 }
@@ -1123,7 +1222,7 @@ function init() {
     S.sort(function(a, b) { return a.nome.localeCompare(b.nome, 'pt'); });
     buildFMap();
     sincronizarTipoDoc();
-    calcCards();
+    calcCards(); renderDash();
     renderT();
     configAC();
     document.getElementById('loading').classList.add('hidden');
