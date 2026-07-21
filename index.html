@@ -98,8 +98,10 @@ tr:hover td{background:#fafafa}
 .exp-panel{display:none}
 .exp-panel.open{display:table-row}
 .hl{background:#fef08a;padding:0 2px;border-radius:2px}
-#tbForn td,#tbForn th{padding:4px 8px}
 #tblForn{width:auto}
+#tblForn th{white-space:normal}
+#tbForn td:first-child{max-width:220px;overflow:hidden;text-overflow:ellipsis}
+#tbForn td,#tbForn th{padding:4px 8px}
 @media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -233,7 +235,7 @@ tr:hover td{background:#fafafa}
                 <th onclick="sortForn('nome')">Fornecedor</th>
                 <th onclick="sortForn('tipo')">Tipo</th>
                 <th onclick="sortForn('tipo_documento')">Tipo Documento</th>
-                <th style="width:56px">Ações</th>
+                <th>Ações</th>
               </tr></thead>
               <tbody id="tbForn"></tbody>
             </table>
