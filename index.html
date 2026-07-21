@@ -98,8 +98,8 @@ tr:hover td{background:#fafafa}
 .exp-panel{display:none}
 .exp-panel.open{display:table-row}
 .hl{background:#fef08a;padding:0 2px;border-radius:2px}
-#tbForn td,#tbForn th{padding:3px 6px}
-#tblForn{table-layout:fixed}
+#tbForn td,#tbForn th{padding:4px 8px}
+#tblForn{width:auto}
 @media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -231,9 +231,9 @@ tr:hover td{background:#fafafa}
             <table id="tblForn">
               <thead><tr>
                 <th onclick="sortForn('nome')">Fornecedor</th>
-                <th onclick="sortForn('tipo')" style="width:95px">Tipo</th>
-                <th onclick="sortForn('tipo_documento')" style="width:120px">Tipo Documento</th>
-                <th style="width:60px">Ações</th>
+                <th onclick="sortForn('tipo')">Tipo</th>
+                <th onclick="sortForn('tipo_documento')">Tipo Documento</th>
+                <th style="width:56px">Ações</th>
               </tr></thead>
               <tbody id="tbForn"></tbody>
             </table>
