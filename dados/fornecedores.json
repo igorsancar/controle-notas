@@ -1,0 +1,317 @@
+[
+  {
+    "nome": "A.J. Rorato",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Adriana Barbosa",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "AEA Distribuidora",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Alan Pereira Furtado",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Alexandre Roberti",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Amarildo Ferreira",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Aranha Informatica",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Artcom",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "ARTCOM",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "B&F Borrachas",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "B&F LEME",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Bertacini Estruturas",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Bonfogo Materiais",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "BRN Industria",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Camila A. - Pães",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Carrera - Casa Fácil",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Casa dos parafusos",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Casa Dos Parafusos",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Cerâmica Carmelo Fior",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Cleber Pinheiro",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Cleberson",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Da Roz",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Edvaldo Aparecido Felisbino",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Elektro",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Embalagens São José",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Fabiana  Veriscimo - Marmita",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Fabiana - Marmita",
+    "tipo": "#N/A",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Faggion",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Falcão Bauer",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Fernandes Locações",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Forte Portas",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Glauciene I. - Areial",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "HBM Transportes",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Hedger",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Juliana Rodrigues",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Lukma",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "MR Gesso",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Novelita Nunes",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "P.H.E. Tintas",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "PCI Comércio - Drywall",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Pedro Dipres",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Polimix",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Ponto Do Encanador",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "RCV Araraquara",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Reinaldo B. - Pães",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "RentService",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "RR Parafusos",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "SAECIL",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Sebastiao Sanguino",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "TED Comércio de Tintas",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Tenda Atacado",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Tiago Barboza",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Tigre",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "TT Premoldados",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "V.F.A Casa Construtor",
+    "tipo": "#N/A",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "V.F.A Leme / Casa Construtor",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Valdecir Donizeti",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Votorantim",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Walsywa ind.",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Wellington Pinturas",
+    "tipo": "Serviço",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "Wireflex",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "XTURBO PROVEDOR",
+    "tipo": "Material",
+    "tipo_documento": ""
+  },
+  {
+    "nome": "YT Bortholin",
+    "tipo": "Material",
+    "tipo_documento": ""
+  }
+]
