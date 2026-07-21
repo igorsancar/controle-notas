@@ -99,9 +99,6 @@ tr:hover td{background:#fafafa}
 .exp-panel.open{display:table-row}
 .hl{background:#fef08a;padding:0 2px;border-radius:2px}
 #tbForn td,#tbForn th{padding:3px 5px}
-#tbForn th:nth-child(1){width:auto}
-#tbForn th:nth-child(2){width:80px}
-#tbForn th:nth-child(3){width:100px}
 @media(max-width:768px){.fg{grid-template-columns:1fr}.srch{width:100%}.ic-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -230,7 +227,7 @@ tr:hover td{background:#fafafa}
             <button class="btn btn-pri btn-sm" onclick="novoForn()">+ Novo Fornecedor</button>
           </div>
           <div class="tbl-wrap">
-            <table>
+            <table style="table-layout:fixed">
               <thead><tr>
                 <th onclick="sortForn('nome')" style="white-space:normal">Fornecedor</th>
                 <th onclick="sortForn('tipo')" style="white-space:normal;width:80px">Tipo</th>
